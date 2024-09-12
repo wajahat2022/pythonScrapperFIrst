@@ -136,18 +136,66 @@
 
 # i go to thhat page manually and THEN I AM SCRAPPING PROFILE PIC OF THAT AND THERE IS 3RD COLUMN WHICH HAS id so the profile pictuure i am saving should be saved with that id in 4 column then we have to go to next entry and have to search instagram profile pic if have any and if instagram is fouund and profile picture is saved with that id value present in 4 
 
+# from selenium import webdriver
+# from selenium.webdriver.chrome.service import Service
+# from selenium.webdriver.chrome.options import Options
+# import time
+# import pandas as pd 
+# from tabulate import tabulate
+
+# sheet_id = '1MQGvVQMZcRreOW_3d8UaCmmEni6ttE618cII2yTsJz0'
+# df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv")
+
+# print(df)
+# print(tabulate(df, headers='keys', tablefmt='psql'))
+# # Updated path to the ChromeDriver executable
+# chrome_driver_path = r"C:\Users\RGB PC GAMER\Desktop\pythhon scrapper\Chrome web driver\chromedriver-win64\chromedriver.exe"
+
+# # Updated path to the custom Chrome executable
+# chrome_exe_path = r"C:\Users\RGB PC GAMER\Desktop\pythhon scrapper\Chrome\chrome-win64\chrome.exe"
+
+# # Set Chrome options to point to the custom Chrome executable
+# chrome_options = Options()
+# chrome_options.binary_location = chrome_exe_path
+
+# # Create a Service object for ChromeDriver
+# service = Service(executable_path=chrome_driver_path)
+
+# try:
+#     # Initialize the WebDriver with the Service object and Chrome options
+#     driver = webdriver.Chrome(service=service, options=chrome_options)
+    
+#     # Open a website
+#     driver.get('https://google.com')
+    
+#     # Wait indefinitely to keep the browser open
+#     input("Press Enter to close the browser...")
+
+# finally:
+#     # No action needed in the finally block if not closing the browser
+#     pass
+
+
+# ----- 
+# third 
+
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-import time
-import pandas as pd 
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import pandas as pd
 from tabulate import tabulate
+import time
 
+# Google Sheets CSV URL
 sheet_id = '1MQGvVQMZcRreOW_3d8UaCmmEni6ttE618cII2yTsJz0'
 df = pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv")
 
 print(df)
 print(tabulate(df, headers='keys', tablefmt='psql'))
+
 # Updated path to the ChromeDriver executable
 chrome_driver_path = r"C:\Users\RGB PC GAMER\Desktop\pythhon scrapper\Chrome web driver\chromedriver-win64\chromedriver.exe"
 
@@ -165,12 +213,55 @@ try:
     # Initialize the WebDriver with the Service object and Chrome options
     driver = webdriver.Chrome(service=service, options=chrome_options)
     
-    # Open a website
+    # Open Google
     driver.get('https://google.com')
     
+    # Get the first row of data
+    first_row = df.iloc[0]
+    name = first_row['NAME']
+    location_zip = first_row['LOCATION_ZIP']
+    location_street = first_row['LOCATION_STREET']
+    
+    # Construct search query for Instagram
+    search_query = f"{name} {location_street} {location_zip} site:instagram.com"
+    
+    # Print search query
+    print(f"Search Query: {search_query}")
+    
+    # Locate the search box and perform the search
+    search_box = driver.find_element(By.NAME, "q")
+    search_box.send_keys(search_query)
+    search_box.send_keys(Keys.RETURN)
+    
+    # Wait for results to load
+    time.sleep(5)
+    
+    # Print the current URL after search
+    search_url = driver.current_url
+    print(f"Search URL: {search_url}")
+    
+    # Check for Instagram profile URL
+    try:
+        profile_links = driver.find_elements(By.XPATH, "//a[contains(@href, 'instagram.com')]")
+        if profile_links:
+            profile_url = profile_links[0].get_attribute("href")
+            print(f"Profile URL: {profile_url}")
+            
+            # Verify and visit the Instagram profile
+            if profile_url.startswith("https://www.instagram.com/"):
+                driver.get(profile_url)
+                print(f"Visiting Instagram Profile: {profile_url}")
+            else:
+                print("No valid Instagram profile found.")
+        else:
+            print("No Instagram profiles found in the search results.")
+    
+    except Exception as e:
+        print(f"Error: {e}")
+    
     # Wait indefinitely to keep the browser open
-    input("Press Enter to close the browser...")
+    input("Press Enter to keep the browser open and continue...")
 
 finally:
-    # No action needed in the finally block if not closing the browser
-    pass
+    # Close WebDriver
+    driver.quit()
