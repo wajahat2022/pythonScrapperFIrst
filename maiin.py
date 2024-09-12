@@ -256,10 +256,19 @@ def process_row(row_index):
             # Scroll to the Instagram profile link to ensure visibility
             driver.execute_script("arguments[0].scrollIntoView(true);", profile_link)
             time.sleep(1)  # Pause briefly after scrolling
+
+            # Retry clicking if intercepted
+            attempts = 0
+            while attempts < 3:
+                try:
+                    profile_link.click()
+                    print(f"Visiting Instagram Profile: {profile_url}")
+                    break
+                except Exception as e:
+                    print(f"Click failed, retrying... ({attempts+1}/3)")
+                    time.sleep(2)
+                    attempts += 1
             
-            # Click on the Instagram profile link
-            profile_link.click()
-            print(f"Visiting Instagram Profile: {profile_url}")
         except Exception as e:
             print(f"Instagram profile not found or error for {name}: {e}")
         
