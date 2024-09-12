@@ -8,7 +8,7 @@
 
 
 # i need to manually copy each entry and paste it to chrome to get respective restaurant and i have too look in first page about instagram of that restaurant if have any like in this case 
-# https://www.instagram.com/SilvasSportsBar/
+# https://www.instagram.com/SilvasSportsBar/ 
 
 
 
