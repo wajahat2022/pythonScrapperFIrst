@@ -222,8 +222,8 @@ try:
     location_zip = first_row['LOCATION_ZIP']
     location_street = first_row['LOCATION_STREET']
     
-    # Construct search query for Instagram
-    search_query = f"{name} {location_street} {location_zip} site:instagram.com"
+    # Construct search query for restaurant data
+    search_query = f"{name} {location_street} {location_zip}"
     
     # Print search query
     print(f"Search Query: {search_query}")
@@ -240,28 +240,27 @@ try:
     search_url = driver.current_url
     print(f"Search URL: {search_url}")
     
-    # Check for Instagram profile URL
+    # Check for Instagram profile URL in the search results
     try:
+        # Look for Instagram profile link in search results
         profile_links = driver.find_elements(By.XPATH, "//a[contains(@href, 'instagram.com')]")
+        
         if profile_links:
             profile_url = profile_links[0].get_attribute("href")
-            print(f"Profile URL: {profile_url}")
+            print(f"Instagram Profile Found: {profile_url}")
             
-            # Verify and visit the Instagram profile
-            if profile_url.startswith("https://www.instagram.com/"):
-                driver.get(profile_url)
-                print(f"Visiting Instagram Profile: {profile_url}")
-            else:
-                print("No valid Instagram profile found.")
+            # Click on the Instagram profile link
+            profile_links[0].click()
+            print(f"Visiting Instagram Profile: {profile_url}")
         else:
-            print("No Instagram profiles found in the search results.")
+            print("Instagram profile not found.")
     
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error while searching for Instagram profile: {e}")
     
     # Wait indefinitely to keep the browser open
     input("Press Enter to keep the browser open and continue...")
 
 finally:
-    # Close WebDriver
-    driver.quit()
+    # No action needed in the finally block if not closing the browser
+    pass
