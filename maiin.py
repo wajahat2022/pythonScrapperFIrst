@@ -179,7 +179,6 @@
 # ----- 
 # third 
 
-
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -215,21 +214,25 @@ try:
     
     # Open Google
     driver.get('https://google.com')
+
+    # Pick the next row to check (e.g., the second row after the first one)
+    # Change the index as needed to move to the next row
+    row_index = 2  # Start with the second row; change this to go row by row
+    row = df.iloc[row_index]
     
-    # Get the first row of data
-    first_row = df.iloc[0]
-    name = first_row['NAME']
-    location_zip = first_row['LOCATION_ZIP']
-    location_street = first_row['LOCATION_STREET']
+    name = row['NAME']
+    location_zip = row['LOCATION_ZIP']
+    location_street = row['LOCATION_STREET']
     
     # Construct search query for restaurant data
     search_query = f"{name} {location_street} {location_zip}"
     
     # Print search query
-    print(f"Search Query: {search_query}")
+    print(f"Search Query ({row_index + 1}): {search_query}")
     
     # Locate the search box and perform the search
     search_box = driver.find_element(By.NAME, "q")
+    search_box.clear()  # Clear the search box before entering new search
     search_box.send_keys(search_query)
     search_box.send_keys(Keys.RETURN)
     
@@ -247,19 +250,21 @@ try:
         
         if profile_links:
             profile_url = profile_links[0].get_attribute("href")
-            print(f"Instagram Profile Found: {profile_url}")
+            print(f"Instagram Profile Found for {name}: {profile_url}")
             
             # Click on the Instagram profile link
             profile_links[0].click()
             print(f"Visiting Instagram Profile: {profile_url}")
+            
+            # Add further logic here to download the profile picture if necessary
         else:
-            print("Instagram profile not found.")
+            print(f"Instagram profile not found for {name}.")
     
     except Exception as e:
-        print(f"Error while searching for Instagram profile: {e}")
+        print(f"Error while searching for Instagram profile for {name}: {e}")
     
-    # Wait indefinitely to keep the browser open
-    input("Press Enter to keep the browser open and continue...")
+    # Keep the browser open for manual inspection
+    input("Press Enter to close the browser...")
 
 finally:
     # No action needed in the finally block if not closing the browser
