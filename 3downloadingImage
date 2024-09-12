@@ -5,6 +5,8 @@ from selenium.webdriver.common.keys import Keys
 import pandas as pd
 from tabulate import tabulate
 import time
+import requests
+import os
 
 # Google Sheets CSV URL
 sheet_id = '1MQGvVQMZcRreOW_3d8UaCmmEni6ttE618cII2yTsJz0'
@@ -32,40 +34,41 @@ row_index = 2  # Change this index manually to test different rows
 try:
     # Initialize the WebDriver with the Service object and Chrome options
     driver = webdriver.Chrome(service=service, options=chrome_options)
-    
+
     # Open Google
     driver.get('https://google.com')
-    
+
     # Process the specific row based on row_index
     if row_index < len(df):
         row = df.iloc[row_index]
         name = row['NAME']
         location_zip = row['LOCATION_ZIP']
         location_street = row['LOCATION_STREET']
-        
+        establishment_id = row['ESTABLISHMENT_ID']
+
         # Construct search query
         search_query = f"{name} {location_street} {location_zip}"
-        
+
         # Print search query
         print(f"\nProcessing Entry {row_index + 1}/{len(df)}")
         print(f"Search Query: {search_query}")
-        
+
         # Locate the search box and perform the search
         search_box = driver.find_element("name", "q")
         search_box.clear()  # Clear the previous query
         search_box.send_keys(search_query)
         search_box.send_keys(Keys.RETURN)
-        
+
         # Print the current URL after search
         search_url = driver.current_url
         print(f"Search URL: {search_url}")
-        
+
         # Wait for results to load
         time.sleep(5)
-        
+
         # Print search results page title
         print(driver.title)
-        
+
         # Find Instagram links in the search results
         search_results = driver.find_elements("css selector", "a")
         found = False
@@ -76,16 +79,37 @@ try:
                 result.click()
                 found = True
                 break  # Click the first Instagram link found
-        
+
         if not found:
             print("No Instagram link found.")
-        
+            df.at[row_index, 'Status'] = 'Not Found'
+        else:
+            # Wait for Instagram profile page to load
+            time.sleep(5)
+
+            # Use JavaScript to get the profile picture
+            profile_picture_url = driver.execute_script(
+                "return document.querySelector('img[alt*=\"profile picture\"]').src;"
+            )
+
+            if profile_picture_url:
+                # Download the profile picture
+                response = requests.get(profile_picture_url)
+                with open(f"collectedImages/{establishment_id}.jpg", "wb") as file:
+                    file.write(response.content)
+
+                # Update the Status column in the spreadsheet
+                df.at[row_index, 'Status'] = 'Done'
+            else:
+                print("Profile picture not found.")
+                df.at[row_index, 'Status'] = 'Not Found'
+
     else:
         print("Row index out of range.")
-    
+
     # Wait indefinitely to keep the browser open
     input("Press Enter to keep the browser open and exit...")
 
 finally:
-    # No action needed in the finally block if not closing the browser
-    pass
+    # Close the browser
+    driver.quit()
