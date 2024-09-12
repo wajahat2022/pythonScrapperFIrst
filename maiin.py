@@ -1,3 +1,4 @@
+# waj second 
 # i am doing manuually data entry jjob where i i have a sheet with 3 column which need to be copied like below 
 
 # Silva's Sports Bar	3672 S Bristol St	92704
